@@ -3,8 +3,14 @@ from graph import app
 
 st.set_page_config(page_title="AI Roadmap Planner", layout="wide")
 
-st.title("🚀 AI Roadmap Planner")
-st.caption("Structured Planning Engine with Human-in-the-Loop Refinement")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.title("🚀 AI Roadmap Planner")
+    st.caption("Structured Planning Engine with Human-in-the-Loop Refinement")
+
+with col2:
+    st.link_button("💻 View Code", "https://github.com/YOUR_USERNAME/YOUR_REPO_NAME")
 
 
 # ---------------- DEFAULT SESSION STATE ---------------- #
@@ -126,3 +132,4 @@ if st.session_state.plan_history:
             st.session_state.show_modify = False
 
             st.rerun()
+
