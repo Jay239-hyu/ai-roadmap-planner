@@ -10,7 +10,7 @@ with col1:
     st.caption("Structured Planning Engine with Human-in-the-Loop Refinement")
 
 with col2:
-    st.link_button("💻 View Code", "https://github.com/YOUR_USERNAME/YOUR_REPO_NAME")
+    st.link_button("💻 View Code", "https://github.com/Jay239-hyu/ai-roadmap-planner")
 
 
 # ---------------- DEFAULT SESSION STATE ---------------- #
@@ -132,4 +132,5 @@ if st.session_state.plan_history:
             st.session_state.show_modify = False
 
             st.rerun()
+
 
