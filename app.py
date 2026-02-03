@@ -14,7 +14,6 @@ default_state = {
     "current_level": "",
     "strengths": "",
     "weaknesses": "",
-    "time_available_per_day": "",
     "deadline": "",
     "additional_constraints": "",
     "structured_plan": {},
@@ -22,7 +21,7 @@ default_state = {
     "modification_request": "",
     "plan_history": [],
     "show_modify": False,
-}
+}   
 
 for key, value in default_state.items():
     if key not in st.session_state:
@@ -49,8 +48,15 @@ if not st.session_state.plan_history:
         current_level = st.text_input("📊 Current Skill Level")
         strengths = st.text_area("💪 Strengths")
         weaknesses = st.text_area("⚠ Weaknesses")
-        time_available = st.text_input("⏳ Time Available Per Day")
-        deadline = st.text_input("📅 Deadline")
+        deadline = st.selectbox(
+        "📅 Deadline",
+        [
+            "2 month",
+            "4 months",
+            "6 months",
+        ]
+        )
+
         constraints = st.text_area("📌 Additional Constraints")
 
         submitted = st.form_submit_button("Generate Plan")
@@ -62,7 +68,6 @@ if not st.session_state.plan_history:
             st.session_state.current_level = current_level
             st.session_state.strengths = strengths
             st.session_state.weaknesses = weaknesses
-            st.session_state.time_available_per_day = time_available
             st.session_state.deadline = deadline
             st.session_state.additional_constraints = constraints
 

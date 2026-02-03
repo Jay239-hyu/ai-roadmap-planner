@@ -1,17 +1,16 @@
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict
 from dotenv import load_dotenv
-from llm import llm
+from llm import invoke_llm , groq_llm
 from prompts import (
     system_prompt_for_planner,
     system_prompt_for_modifier,
-    system_prompt_for_formatter,
+    system_prompt_for_formatter
 )
 import json
 import re
 
 load_dotenv()
-
 
 # ---------------- SAFE JSON PARSER ---------------- #
 
@@ -33,12 +32,11 @@ def safe_json_parse(text: str):
 
 # ---------------- STATE ---------------- #
 
-class PlannerState(TypedDict):
+class PlannerState(TypedDict , total = False):
     goal: str
     current_level: str
     strengths: str
     weaknesses: str
-    time_available_per_day: str
     deadline: str
     additional_constraints: str
 
@@ -67,11 +65,9 @@ def plan_generator(state: PlannerState) -> PlannerState:
         {"role": "user", "content": json.dumps(user_data, indent=2)},
     ]
 
-    response = llm.invoke(messages)
+    response = invoke_llm(messages)
 
-    parsed_plan = safe_json_parse(response.content)
-    
-    print("MODEL OUTPUT:", response.content)
+    parsed_plan = safe_json_parse(response)
 
 
     return {
@@ -87,7 +83,6 @@ def plan_modifier(state: PlannerState) -> PlannerState:
         "current_level": state.get("current_level", ""),
         "strengths": state.get("strengths", ""),
         "weaknesses": state.get("weaknesses", ""),
-        "time_available_per_day": state.get("time_available_per_day", ""),
         "deadline": state.get("deadline", ""),
         "additional_constraints": state.get("additional_constraints", ""),
     }
@@ -97,21 +92,21 @@ def plan_modifier(state: PlannerState) -> PlannerState:
         {
             "role": "user",
             "content": f"""
-User Information:
-{json.dumps(user_data, indent=2)}
+        User Information:
+        {json.dumps(user_data, indent=2)}
 
-Current Structured Plan:
-{json.dumps(state.get("structured_plan", {}), indent=2)}
+        Current Structured Plan:
+        {json.dumps(state.get("structured_plan", {}), indent=2)}
 
-Modification Request:
-{state.get("modification_request", "")}
-""",
-        },
-    ]
+        Modification Request:
+        {state.get("modification_request", "")}
+        """,
+                },
+            ]
 
-    response = llm.invoke(messages)
+    response = invoke_llm(messages)
 
-    parsed_plan = safe_json_parse(response.content)
+    parsed_plan = safe_json_parse(response)
 
     return {
         **state,
@@ -127,7 +122,7 @@ def plan_formatter(state: PlannerState) -> PlannerState:
         {"role": "user", "content": json.dumps(state.get("structured_plan", {}), indent=2)},
     ]
 
-    response = llm.invoke(messages)
+    response = groq_llm.invoke(messages)
 
     new_formatted_plan = response.content
 
@@ -139,7 +134,6 @@ def plan_formatter(state: PlannerState) -> PlannerState:
         "formatted_plan": new_formatted_plan,
         "plan_history": updated_history,
     }
-
 
 # ---------------- ROUTER ---------------- #
 
@@ -157,6 +151,7 @@ graph.add_node("plan_generator", plan_generator)
 graph.add_node("plan_modifier", plan_modifier)
 graph.add_node("plan_formatter", plan_formatter)
 
+
 graph.add_conditional_edges(
     START,
     router,
@@ -167,7 +162,10 @@ graph.add_conditional_edges(
 )
 
 graph.add_edge("plan_generator", "plan_formatter")
-graph.add_edge("plan_modifier", "plan_formatter")
+graph.add_edge("plan_modifier" , "plan_formatter")
 graph.add_edge("plan_formatter", END)
 
 app = graph.compile()
+
+
+
